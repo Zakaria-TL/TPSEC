@@ -15,13 +15,14 @@ batch = []
 lock = threading.Lock()
 
 
+
 def process_batch(items):
     messages = [item["message"] for item in items]
     signatures = [item["signature"] for item in items]
     public_keys = [item["public_key"] for item in items]
     proofs = [item["proof"] for item in items]
 
-    # Check proof of possession before aggregating
+    # 1. Validate public keys and proofs of possession
     for item in items:
         if not BLS.KeyValidate(item["public_key"]):
             print("Rejected batch: invalid public key")
@@ -33,29 +34,38 @@ def process_batch(items):
             print("Rejected batch: invalid proof of possession")
             return
 
-    # Aggregate all signatures and verify the batch
-    agg_signature = aggregate(signatures)
+    # 2. Aggregate signatures and verify the batch
+    try:
+        agg_signature = aggregate(signatures)
 
-    valid = verify_aggregate(
-        public_keys,
-        messages,
-        agg_signature,
-        proofs,
-    )
+        valid = verify_aggregate(
+            public_keys,
+            messages,
+            agg_signature,
+            proofs,
+        )
+    except (ValueError, TypeError, AssertionError) as exc:
+        print("Rejected batch: verification error:", exc)
+        return
 
+    # 3. Display the result
     print("\n--- Gateway batch result ---")
     print("Sensors received:", len(items))
     print("Aggregate signature size:", len(agg_signature), "bytes")
     print("Aggregate verification:", valid)
 
-    for item in items:
-        print(
-            f"{item['sensor_id']}: "
-            f"{item['message'].decode('utf-8')}"
-        )
+    if valid:
+        print("RESULT: Batch ACCEPTED")
+        for item in items:
+            print(
+                f"Accepted {item['sensor_id']}: "
+                f"{item['message'].decode('utf-8')}"
+            )
+    else:
+        print("RESULT: Batch REJECTED")
+        print("Reason: At least one message or signature is invalid.")
+        print("No reading in this batch should be trusted.")
 
-    if not valid:
-        print("WARNING: Batch verification failed!")
 
 
 def on_connect(client, userdata, flags, reason_code, properties):

@@ -1,0 +1,5 @@
+Sensors;BLS signing per message (ms);Ed25519 signing per message (ms);BLS individual verification batch (ms);BLS aggregate verification (ms);Ed25519 individual verification batch (ms);One BLS signature (bytes);Aggregate BLS signature (bytes);Total Ed25519 signatures (bytes)
+2;125.4801;0.0373;680.2207;474.403;0.2088;96;96;128
+8;124.3714;0.0348;2617.2954;1322.1695;0.8197;96;96;512
+32;120.7605;0.0335;10448.0016;4703.8415;3.169;96;96;2048
+100;120.3577;0.0335;32660.1361;14294.1666;9.9111;96;96;6400

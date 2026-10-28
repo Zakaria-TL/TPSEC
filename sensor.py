@@ -67,3 +67,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# & "C:\Program Files\mosquitto\mosquitto.exe" -v
